@@ -1,6 +1,9 @@
 package config
 
 import (
+	"fmt"
+	"os"
+	"strings"
 	"time"
 )
 
@@ -62,5 +65,23 @@ func Load() (*Config, error) {
 	v.SetConfigType("yaml")
 	v.AddConfigPath(".")
 	v.AddConfigPath("./config")
+	if err := v.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			return nil, fmt.Errorf("error reading the config file: %w", err)
+		}
+	}
+	v.AutomaticEnv()
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
+	var cfg Config
+	if err := v.Unmarshal(&cfg); err != nil {
+		return nil, fmt.Errorf("error unmarshaling config: %w".err)
+	}
+
+	if proxyList := os.Getenv("PROXY_URLS"); proxyList != "" {
+		cfg.Proxies.Enabled = true
+		cfg.Proxies.URLs = strings.Split(proxyList, ",")
+	}
+
+	return &cfg, nil
 }
