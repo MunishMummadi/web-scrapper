@@ -138,10 +138,6 @@ func main() {
 func setupAPIServer(cfg *config.Config, c *crawler.Crawler, m *metrics.MetricsCollector, storage database.Storage) *http.Server {
 	mux := http.NewServeMux()
 
-	// Serve static files for the web UI
-	fs := http.FileServer(http.Dir("./static"))
-	mux.Handle("/static/", http.StripPrefix("/static/", fs))
-
 	// API endpoint for submitting URLs
 	mux.HandleFunc("/api/enqueue", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
@@ -178,15 +174,6 @@ func setupAPIServer(cfg *config.Config, c *crawler.Crawler, m *metrics.MetricsCo
 	// Data view handler for viewing scraped pages
 	dataViewHandler := api.NewDataViewHandler(storage)
 	dataViewHandler.RegisterRoutes(mux)
-	
-	// Home page redirects to data view
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" {
-			http.NotFound(w, r)
-			return
-		}
-		http.Redirect(w, r, "/view/data", http.StatusFound)
-	})
 
 	// Prometheus metrics endpoint
 	mux.Handle("/metrics", promhttp.Handler())
