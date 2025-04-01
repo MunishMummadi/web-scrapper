@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Title }} - Web Scraper</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="brand">
+                <svg class="brand-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 17l6-6-6-6"></path>
+                    <path d="M12 5l8 8-8 8"></path>
+                </svg>
+                <span class="brand-name">Web Scraper</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="/" class="nav-link {{ if eq .ActivePage "dashboard" }}active{{ end }}">Dashboard</a></li>
+                <li><a href="/view/data" class="nav-link {{ if eq .ActivePage "data" }}active{{ end }}">Data</a></li>
+                <li><a href="/scrape" class="nav-link {{ if eq .ActivePage "scrape" }}active{{ end }}">Scrape</a></li>
+                <li><a href="/settings" class="nav-link {{ if eq .ActivePage "settings" }}active{{ end }}">Settings</a></li>
+            </ul>
+            <button onclick="toggleMobileMenu()" class="btn btn-outline d-md-none">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+    
+    <div id="mobile-menu" class="d-md-none">
+        <ul class="mobile-nav-links">
+            <li><a href="/" class="mobile-nav-link {{ if eq .ActivePage "dashboard" }}active{{ end }}">Dashboard</a></li>
+            <li><a href="/view/data" class="mobile-nav-link {{ if eq .ActivePage "data" }}active{{ end }}">Data</a></li>
+            <li><a href="/scrape" class="mobile-nav-link {{ if eq .ActivePage "scrape" }}active{{ end }}">Scrape</a></li>
+            <li><a href="/settings" class="mobile-nav-link {{ if eq .ActivePage "settings" }}active{{ end }}">Settings</a></li>
+        </ul>
+    </div>
+    
+    <main class="container">
+        {{ template "content" . }}
+    </main>
+    
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Web Scraper. Built with <i class="fas fa-heart" style="color:var(--danger)"></i> in Go.</p>
+        </div>
+    </footer>
+    
+    <script src="/static/js/main.js"></script>
+    {{ block "scripts" . }}{{ end }}
+</body>
+</html>

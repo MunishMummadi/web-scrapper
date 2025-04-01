@@ -1,0 +1,28 @@
+# Environment variables
+.env
+
+# SQLite database files
+*.db
+data/
+
+# Binary files
+web-scrapper
+*.exe
+
+# Log files
+*.log
+
+# IDE specific files
+.vscode/
+.idea/
+
+# Compiled Go files
+*.o
+*.a
+*.so
+
+# Dependency directories (Go modules handle these)
+vendor/
+
+# Mac OS specific
+.DS_Store

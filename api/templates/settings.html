@@ -1,0 +1,569 @@
+{{ define "content" }}
+<div class="dashboard">
+    <h1 class="page-title">Scraper Settings</h1>
+    
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Queue Configuration</h2>
+        </div>
+        <div class="card-body">
+            <form id="queue-settings-form">
+                <div class="form-group">
+                    <label for="queue-timeout" class="form-label">Queue Timeout (seconds)</label>
+                    <div class="input-with-tooltip">
+                        <input type="number" id="queue-timeout" class="form-input" value="1" min="0.1" max="10" step="0.1">
+                        <div class="tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            <span class="tooltip-text">
+                                Redis queue timeout. Lower values (e.g. 1 second) prevent context deadline exceeded errors.
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="worker-timeout" class="form-label">Worker Timeout (seconds)</label>
+                    <div class="input-with-tooltip">
+                        <input type="number" id="worker-timeout" class="form-input" value="1" min="0.1" max="10" step="0.1">
+                        <div class="tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            <span class="tooltip-text">
+                                Crawler worker timeout. Lower values allow faster recovery from errors.
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="empty-queue-backoff" class="form-label">Empty Queue Backoff (milliseconds)</label>
+                    <div class="input-with-tooltip">
+                        <input type="number" id="empty-queue-backoff" class="form-input" value="500" min="100" max="5000" step="100">
+                        <div class="tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            <span class="tooltip-text">
+                                Time to wait before polling again when queue is empty. Prevents CPU spinning.
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Queue Settings</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Circuit Breaker Configuration</h2>
+        </div>
+        <div class="card-body">
+            <form id="circuit-breaker-form">
+                <div class="form-group">
+                    <label for="error-threshold" class="form-label">Error Threshold</label>
+                    <div class="input-with-tooltip">
+                        <input type="number" id="error-threshold" class="form-input" value="5" min="1" max="20">
+                        <div class="tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            <span class="tooltip-text">
+                                Number of errors before circuit breaker trips for a domain
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="reset-timeout" class="form-label">Reset Timeout (minutes)</label>
+                    <div class="input-with-tooltip">
+                        <input type="number" id="reset-timeout" class="form-input" value="15" min="1" max="60">
+                        <div class="tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            <span class="tooltip-text">
+                                Time to wait before attempting to reset circuit breaker
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Circuit Breaker Settings</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Rate Limiting</h2>
+        </div>
+        <div class="card-body">
+            <form id="rate-limit-form">
+                <div class="form-group">
+                    <label for="global-rate" class="form-label">Global Rate Limit (requests per minute)</label>
+                    <div class="input-with-tooltip">
+                        <input type="number" id="global-rate" class="form-input" value="120" min="10" max="1000" step="10">
+                        <div class="tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            <span class="tooltip-text">
+                                Maximum total requests per minute across all domains
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="per-domain-rate" class="form-label">Per-Domain Rate Limit (requests per minute)</label>
+                    <div class="input-with-tooltip">
+                        <input type="number" id="per-domain-rate" class="form-input" value="30" min="1" max="100" step="1">
+                        <div class="tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            <span class="tooltip-text">
+                                Maximum requests per minute to a single domain
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Rate Limit Settings</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Proxy Configuration</h2>
+        </div>
+        <div class="card-body">
+            <form id="proxy-form">
+                <div class="form-group">
+                    <label for="use-proxies" class="form-label">Enable Proxy Rotation</label>
+                    <label class="switch">
+                        <input type="checkbox" id="use-proxies">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label for="proxy-list" class="form-label">Proxy List (one per line)</label>
+                    <textarea id="proxy-list" class="form-input" rows="5" placeholder="http://user:pass@proxy1.example.com:8080&#10;http://user:pass@proxy2.example.com:8080"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="proxy-test-url" class="form-label">Proxy Test URL</label>
+                    <input type="url" id="proxy-test-url" class="form-input" value="https://httpbin.org/ip">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Proxy Settings</button>
+                    <button type="button" id="test-proxies" class="btn btn-outline">Test Proxies</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">User Agent Configuration</h2>
+        </div>
+        <div class="card-body">
+            <form id="user-agent-form">
+                <div class="form-group">
+                    <label for="rotate-user-agents" class="form-label">Rotate User Agents</label>
+                    <label class="switch">
+                        <input type="checkbox" id="rotate-user-agents" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label for="user-agent-list" class="form-label">User Agent List (one per line)</label>
+                    <textarea id="user-agent-list" class="form-input" rows="5">Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36
+Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Safari/605.1.15
+Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36
+Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:90.0) Gecko/20100101 Firefox/90.0</textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save User Agent Settings</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{{ end }}
+
+{{ define "scripts" }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load existing settings from API
+        loadSettings();
+        
+        // Initialize form submission handlers
+        initializeForms();
+    });
+    
+    // Load settings from API
+    function loadSettings() {
+        fetch('/api/settings')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Queue settings
+                if (data.queue) {
+                    document.getElementById('queue-timeout').value = data.queue.timeout || 1;
+                    document.getElementById('worker-timeout').value = data.queue.workerTimeout || 1;
+                    document.getElementById('empty-queue-backoff').value = data.queue.emptyQueueBackoff || 500;
+                }
+                
+                // Circuit breaker settings
+                if (data.circuitBreaker) {
+                    document.getElementById('error-threshold').value = data.circuitBreaker.errorThreshold || 5;
+                    document.getElementById('reset-timeout').value = data.circuitBreaker.resetTimeout || 15;
+                }
+                
+                // Rate limit settings
+                if (data.rateLimit) {
+                    document.getElementById('global-rate').value = data.rateLimit.globalRate || 120;
+                    document.getElementById('per-domain-rate').value = data.rateLimit.perDomainRate || 30;
+                }
+                
+                // Proxy settings
+                if (data.proxies) {
+                    document.getElementById('use-proxies').checked = data.proxies.enabled || false;
+                    document.getElementById('proxy-list').value = data.proxies.list ? data.proxies.list.join('\n') : '';
+                    document.getElementById('proxy-test-url').value = data.proxies.testUrl || 'https://httpbin.org/ip';
+                }
+                
+                // User agent settings
+                if (data.userAgents) {
+                    document.getElementById('rotate-user-agents').checked = data.userAgents.rotate || true;
+                    document.getElementById('user-agent-list').value = data.userAgents.list ? data.userAgents.list.join('\n') : '';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading settings:', error);
+                showAlert('error', `Failed to load settings: ${error.message}`);
+            });
+    }
+    
+    // Initialize form submission handlers
+    function initializeForms() {
+        // Queue settings form
+        document.getElementById('queue-settings-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const settings = {
+                timeout: parseFloat(document.getElementById('queue-timeout').value),
+                workerTimeout: parseFloat(document.getElementById('worker-timeout').value),
+                emptyQueueBackoff: parseInt(document.getElementById('empty-queue-backoff').value)
+            };
+            
+            saveSettings('queue', settings);
+        });
+        
+        // Circuit breaker form
+        document.getElementById('circuit-breaker-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const settings = {
+                errorThreshold: parseInt(document.getElementById('error-threshold').value),
+                resetTimeout: parseInt(document.getElementById('reset-timeout').value)
+            };
+            
+            saveSettings('circuit-breaker', settings);
+        });
+        
+        // Rate limit form
+        document.getElementById('rate-limit-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const settings = {
+                globalRate: parseInt(document.getElementById('global-rate').value),
+                perDomainRate: parseInt(document.getElementById('per-domain-rate').value)
+            };
+            
+            saveSettings('rate-limit', settings);
+        });
+        
+        // Proxy form
+        document.getElementById('proxy-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const proxyList = document.getElementById('proxy-list').value
+                .split('\n')
+                .filter(line => line.trim() !== '');
+            
+            const settings = {
+                enabled: document.getElementById('use-proxies').checked,
+                list: proxyList,
+                testUrl: document.getElementById('proxy-test-url').value
+            };
+            
+            saveSettings('proxies', settings);
+        });
+        
+        // User agent form
+        document.getElementById('user-agent-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const userAgentList = document.getElementById('user-agent-list').value
+                .split('\n')
+                .filter(line => line.trim() !== '');
+            
+            const settings = {
+                rotate: document.getElementById('rotate-user-agents').checked,
+                list: userAgentList
+            };
+            
+            saveSettings('user-agents', settings);
+        });
+        
+        // Test proxies button
+        document.getElementById('test-proxies').addEventListener('click', function() {
+            const proxyList = document.getElementById('proxy-list').value
+                .split('\n')
+                .filter(line => line.trim() !== '');
+                
+            if (proxyList.length === 0) {
+                showAlert('error', 'No proxies to test. Please add proxies to the list.');
+                return;
+            }
+            
+            const testUrl = document.getElementById('proxy-test-url').value;
+            
+            this.disabled = true;
+            this.innerHTML = '<span class="loader"></span> Testing...';
+            
+            fetch('/api/test-proxies', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    proxies: proxyList,
+                    testUrl: testUrl
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                showProxyTestResults(data);
+            })
+            .catch(error => {
+                showAlert('error', `Proxy test failed: ${error.message}`);
+            })
+            .finally(() => {
+                this.disabled = false;
+                this.innerHTML = 'Test Proxies';
+            });
+        });
+    }
+    
+    // Save settings section to API
+    function saveSettings(section, settings) {
+        fetch(`/api/settings/${section}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(settings)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error ${response.status}`);
+            }
+            return response.text();
+        })
+        .then(() => {
+            showAlert('success', `${section.replace('-', ' ')} settings saved successfully`);
+        })
+        .catch(error => {
+            showAlert('error', `Failed to save settings: ${error.message}`);
+        });
+    }
+    
+    // Show proxy test results
+    function showProxyTestResults(results) {
+        let content = '<div class="proxy-test-results">';
+        content += '<h3>Proxy Test Results</h3>';
+        content += '<table>';
+        content += '<thead><tr><th>Proxy</th><th>Status</th><th>Response Time</th></tr></thead>';
+        content += '<tbody>';
+        
+        results.results.forEach(result => {
+            content += `<tr>`;
+            content += `<td>${result.proxy}</td>`;
+            content += `<td><span class="badge badge-${result.success ? 'success' : 'danger'}">${result.success ? 'Success' : 'Failed'}</span></td>`;
+            content += `<td>${result.responseTime ? result.responseTime + 'ms' : 'N/A'}</td>`;
+            content += `</tr>`;
+        });
+        
+        content += '</tbody></table>';
+        content += '</div>';
+        
+        showModal('Proxy Test Results', content);
+    }
+    
+    // Show alert message
+    function showAlert(type, message) {
+        // Create alert element if it doesn't exist
+        let alertElement = document.getElementById('settings-alert');
+        if (!alertElement) {
+            alertElement = document.createElement('div');
+            alertElement.id = 'settings-alert';
+            alertElement.className = 'alert';
+            document.querySelector('.dashboard').prepend(alertElement);
+        }
+        
+        // Set alert content
+        alertElement.className = `alert alert-${type}`;
+        alertElement.textContent = message;
+        
+        // Show alert
+        alertElement.style.display = 'block';
+        
+        // Hide after 5 seconds
+        setTimeout(() => {
+            alertElement.style.display = 'none';
+        }, 5000);
+    }
+    
+    // Show modal
+    function showModal(title, content) {
+        // Create modal if it doesn't exist
+        let modal = document.getElementById('settings-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'settings-modal';
+            modal.className = 'modal';
+            
+            modal.innerHTML = `
+                <div class="modal-overlay" onclick="closeModal()"></div>
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 id="modal-title"></h3>
+                        <button onclick="closeModal()" class="modal-close"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="modal-content"></div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Set modal content
+        document.getElementById('modal-title').textContent = title;
+        document.getElementById('modal-content').innerHTML = content;
+        
+        // Show modal
+        modal.style.display = 'flex';
+    }
+    
+    // Close modal
+    function closeModal() {
+        const modal = document.getElementById('settings-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+</script>
+
+<style>
+    /* Alert styles */
+    .alert {
+        padding: 1rem;
+        border-radius: 0.375rem;
+        margin-bottom: 1.5rem;
+        display: none;
+    }
+    
+    .alert-success {
+        background-color: #dcfce7;
+        color: #15803d;
+    }
+    
+    .alert-error {
+        background-color: #fee2e2;
+        color: #b91c1c;
+    }
+    
+    /* Toggle switch */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+    
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+    }
+    
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .4s;
+    }
+    
+    input:checked + .slider {
+        background-color: var(--primary);
+    }
+    
+    input:focus + .slider {
+        box-shadow: 0 0 1px var(--primary);
+    }
+    
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+    
+    .slider.round {
+        border-radius: 34px;
+    }
+    
+    .slider.round:before {
+        border-radius: 50%;
+    }
+    
+    /* Proxy test results styles */
+    .proxy-test-results {
+        width: 100%;
+    }
+    
+    .proxy-test-results table {
+        width: 100%;
+        margin-top: 1rem;
+    }
+</style>
+{{ end }}

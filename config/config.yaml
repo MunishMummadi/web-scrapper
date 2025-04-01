@@ -1,0 +1,35 @@
+api:
+  host: "0.0.0.0"
+  port: 8080
+  readTimeout: 30s
+  writeTimeout: 30s
+  shutdownTimeout: 10s
+
+crawler:
+  userAgent: "Distributed-Web-Scraper/1.0 (+https://example.com/bot)"
+  respectRobots: true
+  defaultDelay: 1s
+  maxRetries: 3
+  retryDelay: 5s
+  workerCount: 10
+  requestTimeout: 30s
+  maxConcurrentHosts: 2
+  circuitBreakerRatio: 0.5
+  circuitBreakerTime: 5m
+  headlessBrowser: false
+  cacheExpiration: 24h
+
+database:
+  filePath: "./data/scraper.db"
+
+redis:
+  host: "localhost"
+  port: 6379
+  password: ""
+  db: 0
+
+proxies:
+  enabled: false
+  urls: []
+  apiKey: ""
+  apiUrl: ""
