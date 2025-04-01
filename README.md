@@ -13,12 +13,12 @@ A distributed, scalable, and resilient web scraper built in Go. This system is d
 - **Rate Limiting**: Per-host rate limiting to avoid overwhelming servers
 - **Monitoring**: Prometheus metrics and Grafana dashboards
 - **Storage**:
-  - PostgreSQL for persistent storage
+  - SQLite for persistent storage
   - Redis for caching
 - **API**: RESTful API for job management and results retrieval
 - **Observability**: Structured logging with Zap
 - **Configuration**: Environment variables and config files
-- **Beautiful UI**: Modern dashboard to monitor and control the scraper
+- **Simple Dashboard**: Basic web interface to view and submit scraping jobs
 
 ## Architecture
 
@@ -77,68 +77,73 @@ go build -o scraper
 
 ### Running the Web Scraper
 
+#### Basic Usage
+
 Start the web scraper with:
 
 ```bash
 ./scraper
 ```
 
-Or with specific configuration:
+This will start the web scraper with default settings. The web interface will be available at `http://localhost:8080` (or whatever port you configured in your .env file).
 
-```bash
-./scraper -config=/path/to/config.json
-```
+#### Command Line Options
 
-Seed a URL to start crawling:
+You can provide additional options when starting the scraper:
+
+1. **Specify a seed URL to start crawling immediately**:
 
 ```bash
 ./scraper -seed=https://example.com
 ```
 
-Use in-memory queue (for testing without Redis):
+2. **Use in-memory queue instead of Redis** (useful for testing or when Redis is unavailable):
 
 ```bash
 ./scraper -mem-queue
 ```
 
-## Web Interface
+3. **Specify a custom configuration file**:
 
-The web scraper includes a modern UI accessible at `http://localhost:8080` (or whatever port you configured).
+```bash
+./scraper -config=/path/to/config.json
+```
 
-### Dashboard
+#### Using the Web Interface
 
-The dashboard provides an overview of:
-- Total pages scraped
-- URLs in queue
-- Crawl rate
-- Error rate
-- Charts showing scraping activity and performance
+Once the scraper is running, you can access the web interface at `http://localhost:8080`. The interface allows you to:
 
-### Data View
+1. View the list of scraped pages
+2. Submit new URLs for scraping
+3. View basic statistics about the scraper
 
-View all scraped pages with:
-- Sortable and filterable table
-- Links to original content
-- Content hash information
-- Actions to view details or rescrape
+#### Using the API Directly
 
-### Scraping Interface
+You can also interact with the scraper's API directly from the terminal:
 
-Submit new URLs for scraping with options:
-- Follow links (crawl mode)
-- Stay on same domain
-- Set maximum crawl depth
-- Configure rate limiting
-- Bulk URL submission
+1. **Submit a URL for scraping**:
 
-### Settings
+```bash
+curl -X POST http://localhost:8080/api/enqueue -d "url=https://example.com"
+```
 
-Configure all aspects of the scraper:
-- Queue timeouts and backoff settings
-- Circuit breaker parameters
-- Rate limiting rules
-- Proxy configuration with testing
-- User agent rotation
+2. **Get scraped data as JSON**:
+
+```bash
+curl http://localhost:8080/api/data
+```
+
+3. **Get scraper statistics**:
+
+```bash
+curl http://localhost:8080/api/stats
+```
+
+4. **Check health status**:
+
+```bash
+curl http://localhost:8080/health
+```
 
 ## API Endpoints
 
@@ -146,12 +151,9 @@ Configure all aspects of the scraper:
 |----------|--------|-------------|
 | `/api/enqueue` | POST | Submit a URL for scraping |
 | `/api/data` | GET | Get scraped data as JSON |
+| `/api/stats` | GET | Get scraper statistics |
 | `/api/jobs` | GET | List active scraping jobs |
-| `/api/jobs/{id}/pause` | POST | Pause a running job |
-| `/api/jobs/{id}/resume` | POST | Resume a paused job |
-| `/api/jobs/{id}/cancel` | POST | Cancel a job |
-| `/api/settings/{section}` | POST | Update settings |
-| `/api/test-proxies` | POST | Test proxy configurations |
+| `/api/settings` | GET/POST | Get or update settings |
 | `/health` | GET | Health check endpoint |
 | `/metrics` | GET | Prometheus metrics endpoint |
 
@@ -161,7 +163,7 @@ For optimal performance:
 
 1. **Redis Queue Timeout**: 
    - Set to 1 second (instead of 5) to prevent context deadline exceeded errors
-   - Configure in the Settings UI or .env file
+   - Configure in the .env file
 
 2. **Worker Timeout**:
    - Also set to 1 second for better error handling
@@ -169,7 +171,7 @@ For optimal performance:
 
 3. **Empty Queue Backoff**:
    - Prevents CPU spinning when the queue is empty
-   - Default is 500ms, adjust in Settings UI
+   - Default is 500ms
 
 4. **Rate Limiting**:
    - Configure per-domain limits to respect website constraints
@@ -189,7 +191,7 @@ If you encounter Redis connection issues:
 ### Context Deadline Exceeded
 
 If you see context timeout errors:
-- Reduce Redis queue timeout to 1 second (in Settings)
+- Reduce Redis queue timeout to 1 second
 - Reduce worker timeout to 1 second
 - Implement backoff when queue is empty
 
@@ -200,16 +202,10 @@ If you notice high CPU usage:
 - Reduce polling frequency
 - Adjust the number of worker threads
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+*Crafted with ☕ and 💻 by Munish Mummadi - Web scraping the world, one page at a time!*
